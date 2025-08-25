@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Blog Home</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    nav { background: #333; color: white; padding: 10px; }
+    nav a { color: white; margin-right: 10px; text-decoration: none; }
+    #posts { margin-top: 20px; }
+    article { border-bottom: 1px solid #ccc; padding: 10px 0; }
+  </style>
+</head>
+<body>
+  <nav id="menu">
+    <a href="new.html">New Post</a>
+    <!-- categories will be loaded here -->
+  </nav>
+  <div id="posts"></div>
+  <script>
+    async function loadCategories() {
+      const res = await fetch('/api/categories');
+      const categories = await res.json();
+      const menu = document.getElementById('menu');
+      categories.forEach(cat => {
+        const link = document.createElement('a');
+        link.textContent = cat;
+        link.href = `/?category=${encodeURIComponent(cat)}`;
+        menu.appendChild(link);
+      });
+    }
+
+    async function loadPosts() {
+      const params = new URLSearchParams(window.location.search);
+      const category = params.get('category');
+      const res = await fetch('/api/posts' + (category ? `?category=${category}` : ''));
+      const posts = await res.json();
+      const container = document.getElementById('posts');
+      container.innerHTML = '';
+      posts.forEach(p => {
+        const article = document.createElement('article');
+        article.innerHTML = `<h2>${p.title}</h2><h4>${p.category}</h4><p>${p.content}</p>`;
+        container.appendChild(article);
+      });
+    }
+
+    loadCategories();
+    loadPosts();
+  </script>
+</body>
+</html>
